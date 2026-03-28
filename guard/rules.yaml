@@ -12,6 +12,7 @@ structure:
     - "config"
     - "prompts"
     - "tests"
+    - "skills"
   tool_dir: "tools"  # tool files must live here
 
 naming:

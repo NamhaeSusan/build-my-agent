@@ -11,6 +11,8 @@ RULES_PATH = Path(__file__).parent.parent / "guard" / "rules.yaml"
 # Sample values for all template placeholders.
 SAMPLE_VALUES = {
     "component_name": "order-service",
+    "dependency_checks": "- Check payment gateway: `http_request('payment/health')`",
+    "common_issues": "- OOM: order-service pods restart when processing large batch orders",
     "component_description": "Handles order creation, payment, and fulfillment",
     "opensearch_endpoint": "https://opensearch.internal:9200",
     "opensearch_index_pattern": "order-service-*",
@@ -70,6 +72,7 @@ def _render_project(dest: Path) -> None:
         "tools/http_client.py.tmpl": "tools/http_client.py",
         "tests/test_agent.py.tmpl": "tests/test_agent.py",
         "tests/test_tools.py.tmpl": "tests/test_tools.py",
+        "skills/troubleshooting/SKILL.md.tmpl": "skills/troubleshooting/SKILL.md",
     }
 
     for tmpl_rel, out_rel in file_map.items():

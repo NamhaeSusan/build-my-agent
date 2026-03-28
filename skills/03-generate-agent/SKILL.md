@@ -38,6 +38,9 @@ Create `<component_name>-ops-agent/` in the working directory with the standard 
 │   └── <additional_tools>.py
 ├── prompts/
 │   └── system.md
+├── skills/
+│   └── troubleshooting/
+│       └── SKILL.md
 └── tests/
     ├── test_tools.py
     └── test_agent.py

@@ -15,6 +15,7 @@ def tmp_agent_project(tmp_path: Path) -> Path:
     (project / "config").mkdir()
     (project / "prompts").mkdir()
     (project / "tests").mkdir()
+    (project / "skills").mkdir()
 
     # agent.py
     (project / "agent.py").write_text(textwrap.dedent("""\

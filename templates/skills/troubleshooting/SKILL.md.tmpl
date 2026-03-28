@@ -1,0 +1,36 @@
+---
+name: troubleshooting
+description: Step-by-step troubleshooting guide for {{component_name}} incidents
+---
+
+# {{component_name}} Troubleshooting Guide
+
+Use this skill when diagnosing incidents or unexpected behavior.
+
+## Step 1: Check Error Rate
+
+```
+query_metrics("rate({{prometheus_namespace}}_http_requests_total{status=~'5..'}[5m])")
+```
+
+If error rate is elevated, proceed to Step 2.
+
+## Step 2: Search Recent Errors
+
+```
+search_logs("level:ERROR", time_range="15m")
+```
+
+Look for patterns: repeated exceptions, timeout errors, dependency failures.
+
+## Step 3: Check Dependencies
+
+{{dependency_checks}}
+
+## Step 4: Correlate
+
+Cross-reference log timestamps with metric spikes to identify root cause.
+
+## Common Issues
+
+{{common_issues}}

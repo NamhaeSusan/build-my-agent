@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 from deepagents import create_deep_agent
+from deepagents.backends import FilesystemBackend
 from deepagents.middleware import SummarizationMiddleware
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -16,10 +17,13 @@ def create_agent(structured: bool = False):
     """Create the operational agent for {{component_name}}."""
     system_prompt = Path("prompts/system.md").read_text()
 
+    project_root = Path(__file__).resolve().parent
     kwargs = dict(
         system_prompt=system_prompt,
         tools=[{{tool_list}}],
         middleware=[SummarizationMiddleware()],
+        backend=FilesystemBackend(root_dir=str(project_root), virtual_mode=True),
+        skills=[str(project_root / "skills")],
         checkpointer=MemorySaver(),
     )
     if structured:
