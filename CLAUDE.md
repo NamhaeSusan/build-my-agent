@@ -1,4 +1,4 @@
-# oh-my-agent
+# build-my-agent
 
 Claude Code plugin that generates standardized operational agents for any component using `langchain-ai/deepagents`.
 

@@ -9,7 +9,7 @@ You are running the final structure validation on a generated agent project.
 
 ## Prerequisites
 - A generated agent project exists (from the generate step)
-- The oh-my-agent guard is available
+- The build-my-agent guard is available
 
 ## Process
 

@@ -9,7 +9,7 @@ You are helping a component owner create an operational agent. This skill guides
 
 ## Prerequisites
 - The component owner has a repository you can access
-- You have the oh-my-agent plugin loaded
+- You have the build-my-agent plugin loaded
 
 ## Process
 

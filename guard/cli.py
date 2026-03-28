@@ -1,4 +1,4 @@
-"""CLI entry point for the oh-my-agent AST guard."""
+"""CLI entry point for the build-my-agent AST guard."""
 
 import argparse
 import sys
@@ -9,7 +9,7 @@ from guard.checker import validate
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="oh-my-agent-guard",
+        prog="build-my-agent-guard",
         description="Validate generated agent project structure",
     )
     subparsers = parser.add_subparsers(dest="command")

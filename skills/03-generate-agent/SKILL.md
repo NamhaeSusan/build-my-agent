@@ -9,16 +9,16 @@ You are generating a complete operational agent project based on the design from
 
 ## Prerequisites
 - The `<component>-design.md` file exists from the design step
-- Templates are available in the oh-my-agent `templates/` directory
-- Reference tool implementations are in oh-my-agent `tools/` directory
+- Templates are available in the build-my-agent `templates/` directory
+- Reference tool implementations are in build-my-agent `tools/` directory
 
 ## Process
 
 ### Step 1: Load Design and Templates
 
 1. Read `<component>-design.md`
-2. Read all files in the oh-my-agent `templates/` directory
-3. Read the reference implementations in oh-my-agent `tools/`
+2. Read all files in the build-my-agent `templates/` directory
+3. Read the reference implementations in build-my-agent `tools/`
 
 ### Step 2: Create Project Directory
 

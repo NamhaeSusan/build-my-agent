@@ -1,5 +1,5 @@
 [project]
-name = "oh-my-agent"
+name = "build-my-agent"
 version = "0.1.0"
 description = "Claude Code plugin for generating standardized operational agents"
 requires-python = ">=3.11"
@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-oh-my-agent-guard = "guard.cli:main"
+build-my-agent-guard = "guard.cli:main"
 
 [build-system]
 requires = ["hatchling"]

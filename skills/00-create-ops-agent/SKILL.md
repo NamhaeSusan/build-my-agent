@@ -21,7 +21,7 @@ Phase 4: Validate   → Verify structure and run tests
 ## Before You Start
 
 1. Confirm the component repository path with the owner
-2. Verify you have access to the oh-my-agent plugin files:
+2. Verify you have access to the build-my-agent plugin files:
    - `skills/` — the 4 phase skills
    - `templates/` — agent project boilerplate
    - `tools/` — reference tool implementations (OpenSearch, Prometheus)

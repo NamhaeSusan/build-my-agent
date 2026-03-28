@@ -1,4 +1,4 @@
-# oh-my-agent AST Guard Rules
+# build-my-agent AST Guard Rules
 # These rules enforce structural consistency across all generated agent projects.
 
 structure:

@@ -1,4 +1,4 @@
-# oh-my-agent
+# build-my-agent
 
 Claude Code plugin that generates standardized operational agents for any component using [deepagents](https://github.com/langchain-ai/deepagents).
 
@@ -18,7 +18,7 @@ Every generated agent follows the same structure — enforced by an AST guard.
 
 ```bash
 # From Claude Code
-/plugin install oh-my-agent
+/plugin install build-my-agent
 ```
 
 ### Create an ops agent
@@ -88,7 +88,7 @@ The AST guard enforces:
 ## Plugin Structure
 
 ```
-oh-my-agent/
+build-my-agent/
 ├── .claude-plugin/plugin.json   # Plugin manifest
 ├── skills/                      # Claude Code skills
 │   ├── 00-create-ops-agent/     # Entry point (orchestration)
