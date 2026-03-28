@@ -1,5 +1,3 @@
-import os
-import shutil
 import textwrap
 from pathlib import Path
 

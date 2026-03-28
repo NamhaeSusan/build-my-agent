@@ -88,7 +88,7 @@ def _check_naming(project: Path, rules: dict, structure: dict) -> list[Violation
             except SyntaxError:
                 continue
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
                     if not _is_snake_case(node.name):
                         violations.append(Violation(
                             rule="naming.tool_functions",
@@ -120,15 +120,19 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
 
         public_functions = [
             node for node in ast.iter_child_nodes(tree)
-            if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_")
         ]
 
         # One public function per tool
-        if rules.get("one_public_function_per_tool") and len(public_functions) > 1:
+        if rules.get("one_public_function_per_tool") and len(public_functions) != 1:
             names = [f.name for f in public_functions]
+            if len(public_functions) == 0:
+                msg = f"Tool file must have exactly one public function, found none in {py_file.name}"
+            else:
+                msg = f"Tool file must have exactly one public function, found {len(public_functions)}: {names} in {py_file.name}"
             violations.append(Violation(
                 rule="patterns.one_public_function_per_tool",
-                message=f"Tool file must have exactly one public function, found {len(public_functions)}: {names} in {py_file.name}",
+                message=msg,
                 path=str(py_file),
             ))
 
@@ -152,5 +156,19 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
                             message=f"Hardcoded URL found in {py_file.name}: {node.value}",
                             path=str(py_file),
                         ))
+
+        # Config source must be referenced
+        config_source = rules.get("config_source")
+        if config_source:
+            string_constants = [
+                node.value for node in ast.walk(tree)
+                if isinstance(node, ast.Constant) and isinstance(node.value, str)
+            ]
+            if config_source not in string_constants:
+                violations.append(Violation(
+                    rule="patterns.config_source",
+                    message=f"Tool file must reference config source '{config_source}': {py_file.name}",
+                    path=str(py_file),
+                ))
 
     return violations

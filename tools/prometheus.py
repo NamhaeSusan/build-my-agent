@@ -4,8 +4,20 @@ This is the reference implementation. Generated agents get a copy
 customized with their component's namespace and common queries.
 """
 
+import re
+from datetime import datetime, timedelta
+
 import yaml
 from prometheus_api_client import PrometheusConnect
+
+
+def _parse_duration(duration: str) -> timedelta:
+    match = re.match(r"^(\d+)([smhd])$", duration)
+    if not match:
+        raise ValueError(f"Invalid duration: {duration}")
+    value, unit = int(match.group(1)), match.group(2)
+    units = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days"}
+    return timedelta(**{units[unit]: value})
 
 
 def _load_config(config_path: str = "config/agent.yaml") -> dict:
@@ -40,10 +52,12 @@ def query_metrics(
     )
 
     # Try range query first, fall back to instant
+    end_time = datetime.now()
+    start_time = end_time - _parse_duration(duration)
     result = prom.custom_query_range(
         query=promql,
-        start_time=f"now-{duration}",
-        end_time="now",
+        start_time=start_time,
+        end_time=end_time,
         step=step,
     )
 
