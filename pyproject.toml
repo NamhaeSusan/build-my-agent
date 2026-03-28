@@ -14,6 +14,7 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "ruff>=0.4.0",
 ]
 
 [project.scripts]
@@ -22,3 +23,15 @@ build-my-agent-guard = "guard.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "S"]
+ignore = ["S101"]  # assert in tests is fine
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S"]  # security rules not relevant in tests
+"tools/http_client.py" = ["S310"]  # urlopen is the tool's purpose

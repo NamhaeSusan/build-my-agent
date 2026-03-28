@@ -129,7 +129,10 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
             if len(public_functions) == 0:
                 msg = f"Tool file must have exactly one public function, found none in {py_file.name}"
             else:
-                msg = f"Tool file must have exactly one public function, found {len(public_functions)}: {names} in {py_file.name}"
+                msg = (
+                    f"Tool file must have exactly one public function, "
+                    f"found {len(public_functions)}: {names} in {py_file.name}"
+                )
             violations.append(Violation(
                 rule="patterns.one_public_function_per_tool",
                 message=msg,

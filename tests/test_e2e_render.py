@@ -3,8 +3,6 @@
 import re
 from pathlib import Path
 
-import pytest
-
 from guard.checker import validate
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
