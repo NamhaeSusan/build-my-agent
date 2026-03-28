@@ -30,15 +30,18 @@ python -m guard check <agent-project-path>
 > ```bash
 > cd <component_name>-ops-agent
 > pip install -e '.[dev]'
-> python agent.py
+> python agent.py                              # interactive mode
+> python agent.py --once "check error rate"    # single query
+> python agent.py --diagnose --once "why is latency high?"  # structured report
 > ```
 >
 > To add new tools later:
 > 1. Create a new file in `tools/` with one public function and a docstring
-> 2. Add its config section to `config/agent.yaml`
-> 3. Import and export from `tools/__init__.py`
-> 4. Register in `agent.py`
-> 5. Run `python -m guard check .` to verify"
+> 2. Use lazy config loading: `_get_*_config()` pattern (see existing tools for reference)
+> 3. Add its config section to `config/agent.yaml`
+> 4. Import and export from `tools/__init__.py`
+> 5. Register in `agent.py` tools list
+> 6. Run `python -m guard check .` to verify"
 
 **If violations found:**
 
