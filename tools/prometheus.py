@@ -19,6 +19,8 @@ def _get_prom_config() -> dict:
     global _config
     if not _config:
         _config = yaml.safe_load(_CONFIG_PATH.read_text())
+    if "prometheus" not in _config:
+        raise KeyError(f"'prometheus' section missing from {_CONFIG_PATH}")
     return _config["prometheus"]
 
 
@@ -51,7 +53,6 @@ def query_metrics(
 
     prom = PrometheusConnect(
         url=prom_config["endpoint"],
-        disable_ssl=not prom_config["endpoint"].startswith("https"),
     )
 
     # Try range query first, fall back to instant

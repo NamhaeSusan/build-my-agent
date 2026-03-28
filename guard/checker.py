@@ -89,7 +89,7 @@ def _check_naming(project: Path, rules: dict, structure: dict) -> list[Violation
                 tree = ast.parse(py_file.read_text())
             except SyntaxError:
                 continue
-            for node in ast.walk(tree):
+            for node in ast.iter_child_nodes(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
                     if not _is_snake_case(node.name):
                         violations.append(Violation(
@@ -228,6 +228,12 @@ def _check_lint(project: Path, rules: dict, structure: dict) -> list[Violation]:
         violations.append(Violation(
             rule="lint.ruff",
             message=line,
+            path=str(project),
+        ))
+    if result.stderr.strip():
+        violations.append(Violation(
+            rule="lint.ruff",
+            message=f"ruff stderr: {result.stderr.strip()}",
             path=str(project),
         ))
     return violations

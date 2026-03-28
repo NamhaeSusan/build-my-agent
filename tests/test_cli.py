@@ -30,4 +30,4 @@ def test_cli_no_path_shows_usage():
         capture_output=True,
         text=True,
     )
-    assert result.returncode != 0
+    assert result.returncode == 2

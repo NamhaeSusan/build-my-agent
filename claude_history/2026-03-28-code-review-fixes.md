@@ -29,6 +29,19 @@ Comprehensive code review of the entire project, fixing 8 critical/high issues.
 ### Test Update
 - Removed now-unnecessary `{{{{component_name}}}}` pre-processing in `_render()` since the template no longer uses escaped braces.
 
+### Round 2 Fixes
+9. **tools/prometheus.py** — Same `disable_ssl` bug as template; removed invalid parameter from reference implementation.
+
+10. **tools/opensearch.py** — Added missing KeyError guard for `opensearch` config section (was bare `_config["opensearch"]`, now matches http_client.py pattern).
+
+11. **tools/prometheus.py** — Added missing KeyError guard for `prometheus` config section.
+
+12. **checker.py `_check_naming`** — Changed `ast.walk` to `ast.iter_child_nodes` for function naming check. Previously caught nested functions incorrectly; now consistent with `_check_patterns`.
+
+13. **checker.py `_check_lint`** — Now reports `result.stderr` as a violation instead of silently discarding ruff internal errors.
+
+14. **test_cli.py** — Changed `assert result.returncode != 0` to `== 2` for no-command test, distinguishing argparse usage error from guard failure.
+
 ## Verification
 - All 24 tests pass
 - ruff lint clean

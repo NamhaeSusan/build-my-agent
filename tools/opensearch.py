@@ -17,6 +17,8 @@ def _get_os_config() -> dict:
     global _config
     if not _config:
         _config = yaml.safe_load(_CONFIG_PATH.read_text())
+    if "opensearch" not in _config:
+        raise KeyError(f"'opensearch' section missing from {_CONFIG_PATH}")
     return _config["opensearch"]
 
 
