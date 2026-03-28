@@ -205,7 +205,7 @@ def _check_lint(project: Path, rules: dict, structure: dict) -> list[Violation]:
     if not py_files:
         return []
 
-    cmd = ["ruff", "check", "--select", select]
+    cmd = ["ruff", "check", "--isolated", "--select", select]
     if ignore:
         cmd.extend(["--ignore", ignore])
     cmd.extend(str(f) for f in py_files)

@@ -42,6 +42,13 @@ Comprehensive code review of the entire project, fixing 8 critical/high issues.
 
 14. **test_cli.py** — Changed `assert result.returncode != 0` to `== 2` for no-command test, distinguishing argparse usage error from guard failure.
 
+### Round 3 Fixes
+15. **test_e2e_render.py `_render`** — Now raises `KeyError` on unknown template placeholders instead of silently passing them through, catching template/sample value mismatches.
+
+16. **checker.py `_check_lint`** — Added `--isolated` flag to ruff invocation to prevent config discovery from parent directories or generated projects from interfering with guard's own ruff_select/ruff_ignore settings.
+
+17. **models.py.tmpl** — Changed `severity: str` to `severity: Literal["critical", "warning", "info"]` to enforce the documented allowed values via Pydantic validation.
+
 ## Verification
 - All 24 tests pass
 - ruff lint clean

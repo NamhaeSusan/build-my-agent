@@ -49,7 +49,9 @@ def _render(template_text: str) -> str:
     """Replace {{placeholder}} with sample values."""
     def replacer(match: re.Match) -> str:
         key = match.group(1)
-        return SAMPLE_VALUES.get(key, match.group(0))
+        if key not in SAMPLE_VALUES:
+            raise KeyError(f"Template placeholder not in SAMPLE_VALUES: {{{{{key}}}}}")
+        return SAMPLE_VALUES[key]
 
     return re.sub(r"\{\{(\w+)\}\}", replacer, template_text)
 
