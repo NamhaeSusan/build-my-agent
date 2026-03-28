@@ -15,9 +15,8 @@ from tools import {{tool_imports}}
 
 def create_agent(structured: bool = False):
     """Create the operational agent for {{component_name}}."""
-    system_prompt = Path("prompts/system.md").read_text()
-
     project_root = Path(__file__).resolve().parent
+    system_prompt = (project_root / "prompts" / "system.md").read_text()
     kwargs = dict(
         system_prompt=system_prompt,
         tools=[{{tool_list}}],

@@ -49,6 +49,11 @@ Comprehensive code review of the entire project, fixing 8 critical/high issues.
 
 17. **models.py.tmpl** — Changed `severity: str` to `severity: Literal["critical", "warning", "info"]` to enforce the documented allowed values via Pydantic validation.
 
+### Round 4 Fixes
+18. **agent.py.tmpl `create_agent`** — `Path("prompts/system.md")` used CWD-relative path. If the agent is executed from a different directory, the file won't be found. Reordered to define `project_root` first and use `project_root / "prompts" / "system.md"`.
+
+19. **pyproject.toml.tmpl** — Added missing `[build-system]` section (`hatchling`). Without it, `pip install -e '.[dev]'` may fail on some setups.
+
 ## Verification
 - All 24 tests pass
 - ruff lint clean
