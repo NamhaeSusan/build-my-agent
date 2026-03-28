@@ -24,3 +24,8 @@ patterns:
   tool_docstring_required: true         # tool functions must have docstrings
   no_hardcoded_endpoints: true          # no http:// or https:// literals in tool files
   config_source: "config/agent.yaml"    # config must be loaded from this file
+
+lint:
+  ruff: true                            # run ruff on generated project
+  ruff_select: "E,F,I"                  # errors, pyflakes, isort
+  ruff_ignore: ""                       # no ignores by default

@@ -42,7 +42,7 @@ class TestNamingRules:
 
     def test_snake_case_tool_file_accepted(self, tmp_agent_project: Path, rules_path: Path):
         (tmp_agent_project / "tools" / "kafka_consumer.py").write_text(
-            'def consume_messages():\n    """Consume Kafka messages."""\n    config = "config/agent.yaml"\n    pass\n'
+            'def consume_messages():\n    """Consume Kafka messages."""\n    return {"config": "config/agent.yaml"}\n'
         )
         errors = validate(tmp_agent_project, rules_path)
         assert errors == []
@@ -79,7 +79,7 @@ class TestPatternRules:
 
     def test_async_public_function_counted(self, tmp_agent_project: Path, rules_path: Path):
         (tmp_agent_project / "tools" / "async_tool.py").write_text(
-            'async def fetch_data():\n    """Fetch data."""\n    config = "config/agent.yaml"\n    pass\n'
+            'async def fetch_data():\n    """Fetch data."""\n    return {"config": "config/agent.yaml"}\n'
         )
         errors = validate(tmp_agent_project, rules_path)
         assert errors == []
@@ -100,8 +100,26 @@ class TestPatternRules:
         (tmp_agent_project / "tools" / "http_client.py").write_text(
             'def http_request(url: str, method: str = "GET") -> dict:\n'
             '    """Send an HTTP request."""\n'
+            '    return {"config": "config/agent.yaml", "url": url}\n'
+        )
+        errors = validate(tmp_agent_project, rules_path)
+        assert errors == []
+
+
+class TestLintRules:
+    def test_valid_project_passes_ruff(self, tmp_agent_project: Path, rules_path: Path):
+        errors = validate(tmp_agent_project, rules_path)
+        ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
+        assert ruff_errors == []
+
+    def test_unused_import_caught_by_ruff(self, tmp_agent_project: Path, rules_path: Path):
+        (tmp_agent_project / "tools" / "bad_lint.py").write_text(
+            'import os\n\n\n'
+            'def do_thing():\n'
+            '    """Do thing."""\n'
             '    config = "config/agent.yaml"\n'
             '    return {}\n'
         )
         errors = validate(tmp_agent_project, rules_path)
-        assert errors == []
+        ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
+        assert any("F401" in e.message for e in ruff_errors)

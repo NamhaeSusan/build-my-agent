@@ -53,35 +53,37 @@ def tmp_agent_project(tmp_path: Path) -> Path:
         __all__ = ["search_logs", "query_metrics"]
     """))
 
-    # tools/log_search.py — valid tool
-    (project / "tools" / "log_search.py").write_text(textwrap.dedent("""\
-        import yaml
+    # tools/log_search.py — valid tool (ruff-clean)
+    (project / "tools" / "log_search.py").write_text(
+        'import yaml\n'
+        '\n'
+        '\n'
+        'def _load_config():\n'
+        '    with open("config/agent.yaml") as f:\n'
+        '        return yaml.safe_load(f)\n'
+        '\n'
+        '\n'
+        'def search_logs(query: str, time_range: str = "1h") -> list[dict]:\n'
+        '    """Search OpenSearch logs for the component."""\n'
+        '    config = _load_config()\n'
+        '    return [{"endpoint": config["opensearch"]["endpoint"], "query": query}]\n'
+    )
 
-        def _load_config():
-            with open("config/agent.yaml") as f:
-                return yaml.safe_load(f)
-
-        def search_logs(query: str, time_range: str = "1h") -> list[dict]:
-            \"\"\"Search OpenSearch logs for the component.\"\"\"
-            config = _load_config()
-            endpoint = config["opensearch"]["endpoint"]
-            return []
-    """))
-
-    # tools/metric_query.py — valid tool
-    (project / "tools" / "metric_query.py").write_text(textwrap.dedent("""\
-        import yaml
-
-        def _load_config():
-            with open("config/agent.yaml") as f:
-                return yaml.safe_load(f)
-
-        def query_metrics(promql: str, duration: str = "5m") -> dict:
-            \"\"\"Query Prometheus metrics for the component.\"\"\"
-            config = _load_config()
-            endpoint = config["prometheus"]["endpoint"]
-            return {}
-    """))
+    # tools/metric_query.py — valid tool (ruff-clean)
+    (project / "tools" / "metric_query.py").write_text(
+        'import yaml\n'
+        '\n'
+        '\n'
+        'def _load_config():\n'
+        '    with open("config/agent.yaml") as f:\n'
+        '        return yaml.safe_load(f)\n'
+        '\n'
+        '\n'
+        'def query_metrics(promql: str, duration: str = "5m") -> dict:\n'
+        '    """Query Prometheus metrics for the component."""\n'
+        '    config = _load_config()\n'
+        '    return {"endpoint": config["prometheus"]["endpoint"], "promql": promql}\n'
+    )
 
     return project
 

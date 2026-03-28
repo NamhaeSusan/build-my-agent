@@ -2,6 +2,7 @@
 
 import ast
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -33,6 +34,7 @@ def validate(project_path: Path, rules_path: Path) -> list[Violation]:
     violations.extend(_check_structure(project_path, rules.get("structure", {})))
     violations.extend(_check_naming(project_path, rules.get("naming", {}), rules.get("structure", {})))
     violations.extend(_check_patterns(project_path, rules.get("patterns", {}), rules.get("structure", {})))
+    violations.extend(_check_lint(project_path, rules.get("lint", {})))
     return violations
 
 
@@ -187,4 +189,45 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
                     path=str(py_file),
                 ))
 
+    return violations
+
+
+def _check_lint(project: Path, rules: dict) -> list[Violation]:
+    """Run ruff on the project's Python files."""
+    if not rules.get("ruff", False):
+        return []
+
+    select = rules.get("ruff_select", "E,F,I")
+    ignore = rules.get("ruff_ignore", "")
+
+    tool_dir = project / "tools"
+    py_files = [f for f in tool_dir.glob("*.py") if f.name != "__init__.py"] if tool_dir.is_dir() else []
+    if not py_files:
+        return []
+
+    cmd = ["ruff", "check", "--select", select]
+    if ignore:
+        cmd.extend(["--ignore", ignore])
+    cmd.extend(str(f) for f in py_files)
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)  # noqa: S603
+    except FileNotFoundError:
+        return [Violation(
+            rule="lint.ruff",
+            message="ruff not installed — install with: pip install ruff",
+            path=str(project),
+        )]
+
+    if result.returncode == 0:
+        return []
+
+    violations = []
+    for line in result.stdout.strip().splitlines():
+        # ruff output: path/file.py:10:5: E302 expected 2 blank lines
+        violations.append(Violation(
+            rule="lint.ruff",
+            message=line,
+            path=str(project),
+        ))
     return violations
