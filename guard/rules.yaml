@@ -1,0 +1,25 @@
+# oh-my-agent AST Guard Rules
+# These rules enforce structural consistency across all generated agent projects.
+
+structure:
+  required_files:
+    - "agent.py"
+    - "config/agent.yaml"
+    - "tools/__init__.py"
+    - "prompts/system.md"
+  required_dirs:
+    - "tools"
+    - "config"
+    - "prompts"
+    - "tests"
+  tool_dir: "tools"  # tool files must live here
+
+naming:
+  tool_files: "snake_case"       # e.g. log_search.py, metric_query.py
+  tool_functions: "snake_case"   # e.g. search_logs, query_metrics
+
+patterns:
+  one_public_function_per_tool: true    # each tool file exports exactly one public function
+  tool_docstring_required: true         # tool functions must have docstrings
+  no_hardcoded_endpoints: true          # no http:// or https:// literals in tool files
+  config_source: "config/agent.yaml"    # config must be loaded from this file
