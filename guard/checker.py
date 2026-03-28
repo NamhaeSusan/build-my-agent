@@ -1,0 +1,156 @@
+"""AST-based structure validator for generated agent projects."""
+
+import ast
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+
+
+@dataclass
+class Violation:
+    """A single rule violation."""
+    rule: str       # e.g. "structure.required_files"
+    message: str    # human-readable description
+    path: str       # file or directory that caused the violation
+
+
+def validate(project_path: Path, rules_path: Path) -> list[Violation]:
+    """Validate a generated agent project against the guard rules.
+
+    Args:
+        project_path: Root directory of the generated agent project.
+        rules_path: Path to the rules.yaml file.
+
+    Returns:
+        List of Violation objects. Empty list means the project is valid.
+    """
+    with open(rules_path) as f:
+        rules = yaml.safe_load(f)
+
+    violations: list[Violation] = []
+    violations.extend(_check_structure(project_path, rules.get("structure", {})))
+    violations.extend(_check_naming(project_path, rules.get("naming", {}), rules.get("structure", {})))
+    violations.extend(_check_patterns(project_path, rules.get("patterns", {}), rules.get("structure", {})))
+    return violations
+
+
+def _check_structure(project: Path, rules: dict) -> list[Violation]:
+    violations = []
+    for f in rules.get("required_files", []):
+        if not (project / f).is_file():
+            violations.append(Violation(
+                rule="structure.required_files",
+                message=f"Required file missing: {f}",
+                path=str(project / f),
+            ))
+    for d in rules.get("required_dirs", []):
+        if not (project / d).is_dir():
+            violations.append(Violation(
+                rule="structure.required_dirs",
+                message=f"Required directory missing: {d}",
+                path=str(project / d),
+            ))
+    return violations
+
+
+_SNAKE_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
+
+
+def _is_snake_case(name: str) -> bool:
+    return _SNAKE_CASE_RE.match(name) is not None
+
+
+def _check_naming(project: Path, rules: dict, structure: dict) -> list[Violation]:
+    violations = []
+    tool_dir = project / structure.get("tool_dir", "tools")
+    if not tool_dir.is_dir():
+        return violations
+
+    for py_file in tool_dir.glob("*.py"):
+        if py_file.name == "__init__.py":
+            continue
+
+        # Check file naming
+        stem = py_file.stem
+        if rules.get("tool_files") == "snake_case" and not _is_snake_case(stem):
+            violations.append(Violation(
+                rule="naming.tool_files",
+                message=f"Tool file name is not snake_case: {py_file.name}",
+                path=str(py_file),
+            ))
+
+        # Check function naming
+        if rules.get("tool_functions") == "snake_case":
+            try:
+                tree = ast.parse(py_file.read_text())
+            except SyntaxError:
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
+                    if not _is_snake_case(node.name):
+                        violations.append(Violation(
+                            rule="naming.tool_functions",
+                            message=f"Tool function name is not snake_case: {node.name} in {py_file.name}",
+                            path=str(py_file),
+                        ))
+
+    return violations
+
+
+_URL_RE = re.compile(r"""https?://[^\s"']+""")
+
+
+def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violation]:
+    violations = []
+    tool_dir = project / structure.get("tool_dir", "tools")
+    if not tool_dir.is_dir():
+        return violations
+
+    for py_file in tool_dir.glob("*.py"):
+        if py_file.name == "__init__.py":
+            continue
+
+        source = py_file.read_text()
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            continue
+
+        public_functions = [
+            node for node in ast.iter_child_nodes(tree)
+            if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
+        ]
+
+        # One public function per tool
+        if rules.get("one_public_function_per_tool") and len(public_functions) > 1:
+            names = [f.name for f in public_functions]
+            violations.append(Violation(
+                rule="patterns.one_public_function_per_tool",
+                message=f"Tool file must have exactly one public function, found {len(public_functions)}: {names} in {py_file.name}",
+                path=str(py_file),
+            ))
+
+        # Docstring required
+        if rules.get("tool_docstring_required"):
+            for func in public_functions:
+                if not ast.get_docstring(func):
+                    violations.append(Violation(
+                        rule="patterns.tool_docstring_required",
+                        message=f"Tool function missing docstring: {func.name} in {py_file.name}",
+                        path=str(py_file),
+                    ))
+
+        # No hardcoded endpoints
+        if rules.get("no_hardcoded_endpoints"):
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    if _URL_RE.search(node.value):
+                        violations.append(Violation(
+                            rule="patterns.no_hardcoded_endpoints",
+                            message=f"Hardcoded URL found in {py_file.name}: {node.value}",
+                            path=str(py_file),
+                        ))
+
+    return violations
