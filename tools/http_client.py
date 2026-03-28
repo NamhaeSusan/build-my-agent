@@ -4,7 +4,6 @@ This is the reference implementation. Use this as a base when adding
 HTTP-based actions to a generated agent (deploy triggers, health checks, etc.).
 """
 
-import json
 import time
 from pathlib import Path
 from urllib.error import HTTPError, URLError
