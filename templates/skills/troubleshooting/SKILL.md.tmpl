@@ -1,36 +1,22 @@
 ---
 name: troubleshooting
-description: Step-by-step troubleshooting guide for {{component_name}} incidents
+description: Troubleshooting index for {{component_name}} — references runbooks for specific scenarios
 ---
 
-# {{component_name}} Troubleshooting Guide
+# {{component_name}} Troubleshooting
 
-Use this skill when diagnosing incidents or unexpected behavior.
+When diagnosing incidents, start with **General Triage** and then refer to the relevant runbook.
 
-## Step 1: Check Error Rate
+## Runbooks
 
-```
-query_metrics("rate({{prometheus_namespace}}_http_requests_total{status=~'5..'}[5m])")
-```
+| Runbook | When to use |
+|---------|-------------|
+| [General Triage](runbooks/triage.md) | First response to any incident — check error rate, search logs, verify dependencies |
+| [Common Issues](runbooks/common-issues.md) | Known failure patterns and their resolutions |
 
-If error rate is elevated, proceed to Step 2.
+## Adding Runbooks
 
-## Step 2: Search Recent Errors
-
-```
-search_logs("level:ERROR", time_range="15m")
-```
-
-Look for patterns: repeated exceptions, timeout errors, dependency failures.
-
-## Step 3: Check Dependencies
-
-{{dependency_checks}}
-
-## Step 4: Correlate
-
-Cross-reference log timestamps with metric spikes to identify root cause.
-
-## Common Issues
-
-{{common_issues}}
+To add a new runbook:
+1. Create a markdown file in `skills/troubleshooting/runbooks/`
+2. Add a row to the table above
+3. Include: symptoms, diagnostic steps (with tool calls), and resolution

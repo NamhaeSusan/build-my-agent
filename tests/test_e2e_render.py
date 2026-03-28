@@ -24,18 +24,18 @@ SAMPLE_VALUES = {
     "additional_capabilities": "- Check order status via internal API",
     "domain_knowledge": "Order states: CREATED -> PAID -> SHIPPED -> DELIVERED",
     "failure_patterns": "- Payment timeout: check payment-gateway metrics first",
-    "tool_imports": "search_logs, query_metrics, http_request",
-    "tool_list": "search_logs, query_metrics, http_request",
+    "tool_imports": "http_request, query_metrics, search_logs",
+    "tool_list": "http_request, query_metrics, search_logs",
     "tool_imports_block": (
+        "from tools.http_client import http_request\n"
         "from tools.log_search import search_logs\n"
-        "from tools.metric_query import query_metrics\n"
-        "from tools.http_client import http_request"
+        "from tools.metric_query import query_metrics"
     ),
-    "tool_all_list": '"search_logs", "query_metrics", "http_request"',
+    "tool_all_list": '"http_request", "search_logs", "query_metrics"',
     "test_imports": (
+        "from tools.http_client import http_request\n"
         "from tools.log_search import search_logs\n"
-        "from tools.metric_query import query_metrics\n"
-        "from tools.http_client import http_request"
+        "from tools.metric_query import query_metrics"
     ),
     "test_cases": (
         'def test_search_logs_returns_list():\n'
@@ -72,6 +72,8 @@ def _render_project(dest: Path) -> None:
         "tests/test_agent.py.tmpl": "tests/test_agent.py",
         "tests/test_tools.py.tmpl": "tests/test_tools.py",
         "skills/troubleshooting/SKILL.md.tmpl": "skills/troubleshooting/SKILL.md",
+        "skills/troubleshooting/runbooks/triage.md.tmpl": "skills/troubleshooting/runbooks/triage.md",
+        "skills/troubleshooting/runbooks/common-issues.md.tmpl": "skills/troubleshooting/runbooks/common-issues.md",
     }
 
     for tmpl_rel, out_rel in file_map.items():
