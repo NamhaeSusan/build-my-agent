@@ -31,6 +31,7 @@ tests/       Guard 테스트
 
 - **OpenSearch** (`tools/opensearch.py`) — 로그 조회
 - **Prometheus** (`tools/prometheus.py`) — 메트릭 쿼리
+- **HTTP Client** (`tools/http_client.py`) — 범용 HTTP 요청 (배포 트리거, 헬스체크 등)
 
 사용자가 Kafka, DB, 대응 API 등을 자유롭게 추가 가능.
 
