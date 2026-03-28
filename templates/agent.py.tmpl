@@ -1,0 +1,21 @@
+"""{{component_name}} operational agent entry point."""
+
+from deepagents import create_deep_agent
+from pathlib import Path
+
+from tools import {{tool_imports}}
+
+
+def create_agent():
+    """Create the operational agent for {{component_name}}."""
+    system_prompt = Path("prompts/system.md").read_text()
+
+    return create_deep_agent(
+        system_prompt=system_prompt,
+        tools=[{{tool_list}}],
+    )
+
+
+if __name__ == "__main__":
+    agent = create_agent()
+    agent.invoke({"messages": [("user", "What is the current status of {{component_name}}?")]})

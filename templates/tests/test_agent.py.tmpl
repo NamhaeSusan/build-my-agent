@@ -1,0 +1,11 @@
+"""Integration test for {{component_name}} ops agent."""
+
+from pathlib import Path
+
+from agent import create_agent
+
+
+def test_agent_creation():
+    """Verify the agent can be created without errors."""
+    agent = create_agent()
+    assert agent is not None
