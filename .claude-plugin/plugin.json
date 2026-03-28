@@ -1,0 +1,11 @@
+{
+  "name": "oh-my-agent",
+  "version": "0.1.0",
+  "description": "Generate standardized operational agents for any component using deepagents. Analyzes codebase, designs agent via Q&A, generates code, and validates structure.",
+  "author": {
+    "name": "kimtaeyun"
+  },
+  "repository": "https://github.com/kimtaeyun/oh-my-agent",
+  "license": "MIT",
+  "keywords": ["ops", "agent", "deepagents", "monitoring", "observability"]
+}
