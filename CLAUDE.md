@@ -8,6 +8,8 @@ Component owner가 Claude Code에서 대화형 Q&A를 통해 자신의 서비스
 
 ## How It Works
 
+진입점: **00-create-ops-agent** 스킬이 전체 흐름을 오케스트레이션.
+
 4단계 Skills 기반 워크플로우:
 
 1. **01-analyze-codebase** — 컴포넌트 코드를 읽고 로깅/메트릭/인프라 의존성 파악
@@ -21,7 +23,7 @@ Component owner가 Claude Code에서 대화형 Q&A를 통해 자신의 서비스
 guard/       AST 구조 검증기 (rules.yaml + checker.py + CLI)
 tools/       레퍼런스 도구 구현 (OpenSearch, Prometheus)
 templates/   생성될 에이전트 프로젝트 보일러플레이트 (.tmpl)
-skills/      Claude Code 스킬 (01~04)
+skills/      Claude Code 스킬 (00 진입점 + 01~04)
 tests/       Guard 테스트
 ```
 
