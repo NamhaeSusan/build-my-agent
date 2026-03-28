@@ -5,7 +5,7 @@ customized with their component's namespace and common queries.
 """
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import yaml
@@ -56,7 +56,7 @@ def query_metrics(
     )
 
     # Try range query first, fall back to instant
-    end_time = datetime.now()
+    end_time = datetime.now(tz=timezone.utc)
     start_time = end_time - _parse_duration(duration)
     result = prom.custom_query_range(
         query=promql,

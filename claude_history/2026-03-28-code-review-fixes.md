@@ -54,6 +54,9 @@ Comprehensive code review of the entire project, fixing 8 critical/high issues.
 
 19. **pyproject.toml.tmpl** — Added missing `[build-system]` section (`hatchling`). Without it, `pip install -e '.[dev]'` may fail on some setups.
 
+### Round 5 Fixes
+20. **tools/prometheus.py & metric_query.py.tmpl** — `datetime.now()` → `datetime.now(tz=timezone.utc)`. Naive local-time datetime causes incorrect Prometheus query windows when server timezone differs from UTC.
+
 ## Verification
 - All 24 tests pass
 - ruff lint clean
