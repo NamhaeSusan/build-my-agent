@@ -146,10 +146,18 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
                         path=str(py_file),
                     ))
 
-        # No hardcoded endpoints
+        # No hardcoded endpoints (skip docstrings — they may contain example URLs)
         if rules.get("no_hardcoded_endpoints"):
+            docstrings = {
+                ast.get_docstring(node, clean=False)
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module))
+                and ast.get_docstring(node, clean=False)
+            }
             for node in ast.walk(tree):
                 if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    if node.value in docstrings:
+                        continue
                     if _URL_RE.search(node.value):
                         violations.append(Violation(
                             rule="patterns.no_hardcoded_endpoints",
@@ -157,14 +165,19 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
                             path=str(py_file),
                         ))
 
-        # Config source must be referenced
+        # Config source must be referenced (as literal string or path components)
         config_source = rules.get("config_source")
         if config_source:
+            # Check for literal string "config/agent.yaml" OR
+            # path components like Path(...) / "config" / "agent.yaml"
             string_constants = [
                 node.value for node in ast.walk(tree)
                 if isinstance(node, ast.Constant) and isinstance(node.value, str)
             ]
-            if config_source not in string_constants:
+            parts = config_source.split("/")  # ["config", "agent.yaml"]
+            has_literal = config_source in string_constants
+            has_path_parts = all(p in string_constants for p in parts)
+            if not has_literal and not has_path_parts:
                 violations.append(Violation(
                     rule="patterns.config_source",
                     message=f"Tool file must reference config source '{config_source}': {py_file.name}",
