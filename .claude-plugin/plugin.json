@@ -5,7 +5,7 @@
   "author": {
     "name": "kimtaeyun"
   },
-  "repository": "https://github.com/kimtaeyun/build-my-agent",
+  "repository": "https://github.com/NamhaeSusan/build-my-agent",
   "license": "MIT",
   "keywords": ["ops", "agent", "deepagents", "monitoring", "observability"]
 }

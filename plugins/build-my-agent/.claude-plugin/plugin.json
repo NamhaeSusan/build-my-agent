@@ -1,0 +1,5 @@
+{
+  "name": "build-my-agent",
+  "description": "Generate standardized operational agents for any component using deepagents.",
+  "version": "0.0.1"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "build-my-agent-marketplace",
+  "owner": {
+    "name": "NamhaeSusan"
+  },
+  "metadata": {
+    "description": "Claude Code marketplace for build-my-agent operational agent generator."
+  },
+  "plugins": [
+    {
+      "name": "build-my-agent",
+      "source": "./plugins/build-my-agent",
+      "description": "Generate standardized operational agents for any component using deepagents."
+    }
+  ]
+}
