@@ -1,0 +1,24 @@
+[project]
+name = "oh-my-agent"
+version = "0.1.0"
+description = "Claude Code plugin for generating standardized operational agents"
+requires-python = ">=3.11"
+dependencies = [
+    "deepagents>=0.1.0",
+    "opensearch-py>=2.4.0",
+    "prometheus-api-client>=0.5.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+oh-my-agent-guard = "guard.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
