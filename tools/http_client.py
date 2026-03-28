@@ -1,0 +1,98 @@
+"""General-purpose HTTP client tool for deepagents.
+
+This is the reference implementation. Use this as a base when adding
+HTTP-based actions to a generated agent (deploy triggers, health checks, etc.).
+"""
+
+import json
+import time
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+import yaml
+
+_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_config: dict = {}
+
+
+def _get_http_config() -> dict:
+    global _config
+    if not _config:
+        _config = yaml.safe_load(_CONFIG_PATH.read_text())
+    if "http" not in _config:
+        raise KeyError(f"'http' section missing from {_CONFIG_PATH}")
+    return _config["http"]
+
+
+def http_request(
+    url: str,
+    method: str = "GET",
+    headers: dict | None = None,
+    body: str | None = None,
+    timeout: int | None = None,
+) -> dict:
+    """Send an HTTP request and return the response.
+
+    Use base_urls from config to reference endpoints by alias.
+    For example, if config has base_urls.payment = "http://payment:8080",
+    pass url="payment/health" to call http://payment:8080/health.
+
+    Args:
+        url: Full URL or "alias/path" using config base_urls.
+        method: HTTP method (GET, POST, PUT, DELETE, PATCH).
+        headers: Optional request headers.
+        body: Optional request body (string).
+        timeout: Request timeout in seconds. Uses config default if omitted.
+
+    Returns:
+        Dict with status_code, headers, body, and elapsed_ms.
+    """
+    http_config = _get_http_config()
+    base_urls = http_config.get("base_urls", {})
+    default_timeout = http_config.get("default_timeout", 10)
+
+    # Resolve alias: "payment/health" -> "http://payment:8080/health"
+    resolved_url = url
+    if not url.startswith(("http://", "https://")):
+        parts = url.split("/", 1)
+        alias = parts[0]
+        path = parts[1] if len(parts) > 1 else ""
+        if alias in base_urls:
+            base = base_urls[alias].rstrip("/")
+            resolved_url = f"{base}/{path}" if path else base
+
+    req = Request(
+        resolved_url,
+        method=method.upper(),
+        headers=headers or {},
+        data=body.encode() if body else None,
+    )
+
+    start = time.monotonic()
+    try:
+        with urlopen(req, timeout=timeout or default_timeout) as resp:
+            resp_body = resp.read().decode()
+            elapsed = (time.monotonic() - start) * 1000
+            return {
+                "status_code": resp.status,
+                "headers": dict(resp.getheaders()),
+                "body": resp_body,
+                "elapsed_ms": round(elapsed, 1),
+            }
+    except HTTPError as e:
+        elapsed = (time.monotonic() - start) * 1000
+        return {
+            "status_code": e.code,
+            "headers": dict(e.headers),
+            "body": e.read().decode(),
+            "elapsed_ms": round(elapsed, 1),
+        }
+    except URLError as e:
+        elapsed = (time.monotonic() - start) * 1000
+        return {
+            "status_code": 0,
+            "headers": {},
+            "body": str(e.reason),
+            "elapsed_ms": round(elapsed, 1),
+        }

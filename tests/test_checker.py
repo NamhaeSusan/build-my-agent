@@ -95,3 +95,13 @@ class TestPatternRules:
         """The default fixture tools load config properly — should pass."""
         errors = validate(tmp_agent_project, rules_path)
         assert errors == []
+
+    def test_http_client_tool_accepted(self, tmp_agent_project: Path, rules_path: Path):
+        (tmp_agent_project / "tools" / "http_client.py").write_text(
+            'def http_request(url: str, method: str = "GET") -> dict:\n'
+            '    """Send an HTTP request."""\n'
+            '    config = "config/agent.yaml"\n'
+            '    return {}\n'
+        )
+        errors = validate(tmp_agent_project, rules_path)
+        assert errors == []
