@@ -6,9 +6,20 @@ customized with their component's namespace and common queries.
 
 import re
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import yaml
 from prometheus_api_client import PrometheusConnect
+
+_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_config: dict = {}
+
+
+def _get_prom_config() -> dict:
+    global _config
+    if not _config:
+        _config = yaml.safe_load(_CONFIG_PATH.read_text())
+    return _config["prometheus"]
 
 
 def _parse_duration(duration: str) -> timedelta:
@@ -20,16 +31,10 @@ def _parse_duration(duration: str) -> timedelta:
     return timedelta(**{units[unit]: value})
 
 
-def _load_config(config_path: str = "config/agent.yaml") -> dict:
-    with open(config_path) as f:
-        return yaml.safe_load(f)
-
-
 def query_metrics(
     promql: str,
     duration: str = "5m",
     step: str = "15s",
-    config_path: str = "config/agent.yaml",
 ) -> dict:
     """Query Prometheus metrics for the component.
 
@@ -37,14 +42,12 @@ def query_metrics(
         promql: PromQL query string.
         duration: Time range for range queries (e.g. "5m", "1h").
         step: Query resolution step (e.g. "15s", "1m").
-        config_path: Path to agent config file.
 
     Returns:
         Dict with 'result_type' ("vector" or "matrix") and 'data' (list of series).
         Each series has 'metric' (label dict) and 'values' (list of [timestamp, value]).
     """
-    config = _load_config(config_path)
-    prom_config = config["prometheus"]
+    prom_config = _get_prom_config()
 
     prom = PrometheusConnect(
         url=prom_config["endpoint"],

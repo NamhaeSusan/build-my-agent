@@ -4,13 +4,20 @@ This is the reference implementation. Generated agents get a copy
 customized with their component's index pattern and fields.
 """
 
+from pathlib import Path
+
 import yaml
 from opensearchpy import OpenSearch
 
+_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_config: dict = {}
 
-def _load_config(config_path: str = "config/agent.yaml") -> dict:
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+
+def _get_os_config() -> dict:
+    global _config
+    if not _config:
+        _config = yaml.safe_load(_CONFIG_PATH.read_text())
+    return _config["opensearch"]
 
 
 def search_logs(
@@ -18,7 +25,6 @@ def search_logs(
     time_range: str = "1h",
     level: str | None = None,
     limit: int = 50,
-    config_path: str = "config/agent.yaml",
 ) -> list[dict]:
     """Search OpenSearch logs for the component.
 
@@ -27,13 +33,11 @@ def search_logs(
         time_range: How far back to search (e.g. "1h", "30m", "7d").
         level: Filter by log level (e.g. "ERROR", "WARN"). None means all levels.
         limit: Maximum number of results to return.
-        config_path: Path to agent config file.
 
     Returns:
         List of log entries, each as a dict with timestamp, level, message, and fields.
     """
-    config = _load_config(config_path)
-    os_config = config["opensearch"]
+    os_config = _get_os_config()
 
     client = OpenSearch(
         hosts=[os_config["endpoint"]],

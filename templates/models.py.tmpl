@@ -1,0 +1,13 @@
+"""Structured output models for {{component_name}} ops agent."""
+
+from pydantic import BaseModel, Field
+
+
+class DiagnosisReport(BaseModel):
+    """Structured diagnosis result returned by the agent."""
+
+    summary: str = Field(description="One-line summary of the finding")
+    severity: str = Field(description="Severity level: critical, warning, or info")
+    evidence: list[str] = Field(description="Log snippets or metric values supporting the diagnosis")
+    root_cause: str | None = Field(default=None, description="Identified root cause, if determined")
+    recommendation: str = Field(description="Suggested next action")

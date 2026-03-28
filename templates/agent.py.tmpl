@@ -1,21 +1,80 @@
 """{{component_name}} operational agent entry point."""
 
-from deepagents import create_deep_agent
+import argparse
+import uuid
 from pathlib import Path
 
+from deepagents import create_deep_agent
+from deepagents.middleware import SummarizationMiddleware
+from langgraph.checkpoint.memory import MemorySaver
+
+from models import DiagnosisReport
 from tools import {{tool_imports}}
 
 
-def create_agent():
+def create_agent(structured: bool = False):
     """Create the operational agent for {{component_name}}."""
     system_prompt = Path("prompts/system.md").read_text()
 
-    return create_deep_agent(
+    kwargs = dict(
         system_prompt=system_prompt,
         tools=[{{tool_list}}],
+        middleware=[SummarizationMiddleware()],
+        checkpointer=MemorySaver(),
     )
+    if structured:
+        kwargs["response_format"] = DiagnosisReport
+
+    return create_deep_agent(**kwargs)
+
+
+def run_once(agent, message: str, structured: bool = False):
+    """Single invocation mode."""
+    result = agent.invoke(
+        {"messages": [("user", message)]},
+        config={"configurable": {"thread_id": "once"}},
+    )
+    if structured:
+        report = result.get("structured_response")
+        if report is None:
+            raise RuntimeError(
+                "Agent did not return structured_response. "
+                "Ensure the model supports response_format."
+            )
+        print(report.model_dump_json(indent=2))
+    else:
+        print(result["messages"][-1].content)
+
+
+def run_interactive(agent):
+    """Interactive chat loop."""
+    thread_id = str(uuid.uuid4())
+    print(f"{{{{component_name}}}} ops agent ready. Type 'exit' to quit.\n")
+    while True:
+        try:
+            user_input = input("you> ")
+        except (EOFError, KeyboardInterrupt):
+            break
+        if user_input.strip().lower() in ("exit", "quit"):
+            break
+        result = agent.invoke(
+            {"messages": [("user", user_input)]},
+            config={"configurable": {"thread_id": thread_id}},
+        )
+        print(f"\nagent> {result['messages'][-1].content}\n")
 
 
 if __name__ == "__main__":
-    agent = create_agent()
-    agent.invoke({"messages": [("user", "What is the current status of {{component_name}}?")]})
+    parser = argparse.ArgumentParser(description="{{component_name}} ops agent")
+    parser.add_argument("--once", type=str, help="Run a single query and exit")
+    parser.add_argument("--diagnose", action="store_true", help="Return structured DiagnosisReport")
+    args = parser.parse_args()
+
+    if args.diagnose and not args.once:
+        parser.error("--diagnose requires --once")
+
+    agent = create_agent(structured=args.diagnose)
+    if args.once:
+        run_once(agent, args.once, structured=args.diagnose)
+    else:
+        run_interactive(agent)
