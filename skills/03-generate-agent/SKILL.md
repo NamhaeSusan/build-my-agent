@@ -30,6 +30,7 @@ Create `<component_name>-ops-agent/` in the working directory with the standard 
 ├── config/
 │   └── agent.yaml
 ├── agent.py
+├── models.py
 ├── tools/
 │   ├── __init__.py
 │   ├── log_search.py
@@ -53,12 +54,25 @@ For each file, use the corresponding template from `templates/` as your base. Fi
 - All public functions must have docstrings
 - No hardcoded URLs — everything comes from config/agent.yaml
 - Tool function names must be snake_case
+- Config loading must use the lazy `_get_*_config()` pattern (not module-level loading)
 
 **For additional tools** (Kafka, DB, etc.) that don't have templates:
 - Follow the same pattern as log_search.py and metric_query.py
-- Load config with `_load_config()` private helper
+- For HTTP-based tools (deploy triggers, health checks, etc.), reference `tools/http_client.py`
+- Use lazy config loading with `_get_*_config()` private helper
 - One public function with docstring
 - Return structured data (dicts/lists, not raw client responses)
+
+**agent.py includes:**
+- `SummarizationMiddleware` for compressing long conversations
+- `MemorySaver` checkpointer for conversation persistence
+- `--once "query"` flag for single invocation
+- `--diagnose --once "query"` flag for structured DiagnosisReport output
+- Interactive chat loop as default mode
+
+### Step 3.5: Generate models.py
+
+Using `templates/models.py.tmpl`, generate the DiagnosisReport model. This provides structured output when the agent is run with `--diagnose --once "query"`.
 
 ### Step 4: Write System Prompt
 
@@ -94,7 +108,13 @@ If there are violations, fix them and re-run until all checks pass.
 
 > "Agent project generated at `<component_name>-ops-agent/`. All guard checks pass.
 >
-> To run: `cd <component_name>-ops-agent && pip install -e '.[dev]' && python agent.py`
+> To run:
+> ```bash
+> cd <component_name>-ops-agent && pip install -e '.[dev]'
+> python agent.py                              # interactive mode
+> python agent.py --once "check error rate"    # single query
+> python agent.py --diagnose --once "why is latency high?"  # structured report
+> ```
 >
 > To validate structure: `python -m guard check <component_name>-ops-agent/`
 >
