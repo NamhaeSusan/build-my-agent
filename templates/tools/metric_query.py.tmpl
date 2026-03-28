@@ -51,7 +51,6 @@ def query_metrics(
 
     prom = PrometheusConnect(
         url=prom_config["endpoint"],
-        disable_ssl=not prom_config["endpoint"].startswith("https"),
     )
 
     end_time = datetime.now()

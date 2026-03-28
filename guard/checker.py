@@ -34,7 +34,7 @@ def validate(project_path: Path, rules_path: Path) -> list[Violation]:
     violations.extend(_check_structure(project_path, rules.get("structure", {})))
     violations.extend(_check_naming(project_path, rules.get("naming", {}), rules.get("structure", {})))
     violations.extend(_check_patterns(project_path, rules.get("patterns", {}), rules.get("structure", {})))
-    violations.extend(_check_lint(project_path, rules.get("lint", {})))
+    violations.extend(_check_lint(project_path, rules.get("lint", {}), rules.get("structure", {})))
     return violations
 
 
@@ -192,7 +192,7 @@ def _check_patterns(project: Path, rules: dict, structure: dict) -> list[Violati
     return violations
 
 
-def _check_lint(project: Path, rules: dict) -> list[Violation]:
+def _check_lint(project: Path, rules: dict, structure: dict) -> list[Violation]:
     """Run ruff on the project's Python files."""
     if not rules.get("ruff", False):
         return []
@@ -200,7 +200,7 @@ def _check_lint(project: Path, rules: dict) -> list[Violation]:
     select = rules.get("ruff_select", "E,F,I")
     ignore = rules.get("ruff_ignore", "")
 
-    tool_dir = project / "tools"
+    tool_dir = project / structure.get("tool_dir", "tools")
     py_files = [f for f in tool_dir.glob("*.py") if f.name != "__init__.py"] if tool_dir.is_dir() else []
     if not py_files:
         return []

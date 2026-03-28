@@ -51,10 +51,7 @@ def _render(template_text: str) -> str:
         key = match.group(1)
         return SAMPLE_VALUES.get(key, match.group(0))
 
-    # Handle escaped braces {{{{component_name}}}} -> literal {{component_name}}
-    # These appear in f-string templates like agent.py.tmpl
-    text = template_text.replace("{{{{component_name}}}}", "order-service")
-    return re.sub(r"\{\{(\w+)\}\}", replacer, text)
+    return re.sub(r"\{\{(\w+)\}\}", replacer, template_text)
 
 
 def _render_project(dest: Path) -> None:
@@ -107,7 +104,7 @@ class TestE2ERender:
             tree = ast.parse(py_file.read_text())
             public_funcs = [
                 node.name
-                for node in ast.walk(tree)
+                for node in ast.iter_child_nodes(tree)
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                 and not node.name.startswith("_")
             ]

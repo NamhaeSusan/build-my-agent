@@ -36,7 +36,7 @@ def run_once(agent, message: str, structured: bool = False):
     """Single invocation mode."""
     result = agent.invoke(
         {"messages": [("user", message)]},
-        config={"configurable": {"thread_id": "once"}},
+        config={"configurable": {"thread_id": str(uuid.uuid4())}},
     )
     if structured:
         report = result.get("structured_response")
@@ -53,7 +53,7 @@ def run_once(agent, message: str, structured: bool = False):
 def run_interactive(agent):
     """Interactive chat loop."""
     thread_id = str(uuid.uuid4())
-    print(f"{{{{component_name}}}} ops agent ready. Type 'exit' to quit.\n")
+    print("{{component_name}} ops agent ready. Type 'exit' to quit.\n")
     while True:
         try:
             user_input = input("you> ")
