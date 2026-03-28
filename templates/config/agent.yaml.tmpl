@@ -9,3 +9,9 @@ opensearch:
 prometheus:
   endpoint: {{prometheus_endpoint}}
   namespace: {{prometheus_namespace}}
+
+# Optional: include when http_client tool is added
+http:
+  base_urls:
+    self: "{{self_endpoint}}"
+  default_timeout: 10
