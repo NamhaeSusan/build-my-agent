@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 from opensearchpy import OpenSearch
 
-_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "agent.yaml"
 _config: dict = {}
 
 

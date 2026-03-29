@@ -11,7 +11,7 @@ from pathlib import Path
 import yaml
 from prometheus_api_client import PrometheusConnect
 
-_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "agent.yaml"
 _config: dict = {}
 
 

@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 
 import yaml
 
-_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "agent.yaml"
+_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "agent.yaml"
 _config: dict = {}
 
 
