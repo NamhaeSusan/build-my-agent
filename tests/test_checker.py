@@ -24,6 +24,29 @@ class TestStructureRules:
         errors = validate(tmp_agent_project, rules_path)
         assert any("tools/__init__.py" in e.message for e in errors)
 
+    def test_missing_models_py(self, tmp_agent_project: Path, rules_path: Path):
+        (tmp_agent_project / "models.py").write_text(
+            "from pydantic import BaseModel\n\n\nclass DiagnosisReport(BaseModel):\n    summary: str\n"
+        )
+        (tmp_agent_project / "skills" / "troubleshooting" / "SKILL.md").write_text(
+            "# Test Service Troubleshooting\n"
+        )
+        (tmp_agent_project / "models.py").unlink()
+        errors = validate(tmp_agent_project, rules_path)
+        assert any("models.py" in e.message for e in errors)
+
+    def test_missing_troubleshooting_skill(
+        self, tmp_agent_project: Path, rules_path: Path
+    ):
+        (tmp_agent_project / "models.py").write_text(
+            "from pydantic import BaseModel\n\n\nclass DiagnosisReport(BaseModel):\n    summary: str\n"
+        )
+        skill_path = tmp_agent_project / "skills" / "troubleshooting" / "SKILL.md"
+        skill_path.write_text("# Test Service Troubleshooting\n")
+        skill_path.unlink()
+        errors = validate(tmp_agent_project, rules_path)
+        assert any("skills/troubleshooting/SKILL.md" in e.message for e in errors)
+
 
 class TestNamingRules:
     def test_camel_case_tool_file_rejected(self, tmp_agent_project: Path, rules_path: Path):

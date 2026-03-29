@@ -4,9 +4,11 @@
 structure:
   required_files:
     - "agent.py"
+    - "models.py"
     - "config/agent.yaml"
     - "tools/__init__.py"
     - "prompts/system.md"
+    - "skills/troubleshooting/SKILL.md"
   required_dirs:
     - "tools"
     - "config"

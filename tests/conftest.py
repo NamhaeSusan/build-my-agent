@@ -47,6 +47,21 @@ def tmp_agent_project(tmp_path: Path) -> Path:
         "You are an operational agent for test-service."
     )
 
+    # models.py
+    (project / "models.py").write_text(textwrap.dedent("""\
+        from pydantic import BaseModel
+
+
+        class DiagnosisReport(BaseModel):
+            summary: str
+    """))
+
+    # skills/troubleshooting/SKILL.md
+    (project / "skills" / "troubleshooting").mkdir()
+    (project / "skills" / "troubleshooting" / "SKILL.md").write_text(
+        "# Test Service Troubleshooting"
+    )
+
     # tools/__init__.py
     (project / "tools" / "__init__.py").write_text(textwrap.dedent("""\
         from tools.log_search import search_logs
