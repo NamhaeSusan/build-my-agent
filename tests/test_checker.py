@@ -123,3 +123,51 @@ class TestLintRules:
         errors = validate(tmp_agent_project, rules_path)
         ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
         assert any("F401" in e.message for e in ruff_errors)
+
+
+class TestLintScopeRules:
+    def test_project_scope_catches_agent_py_lint_error(
+        self, tmp_agent_project: Path, rules_path: Path
+    ):
+        """Lint with project scope should catch errors in agent.py (outside tools/)."""
+        (tmp_agent_project / "agent.py").write_text(
+            'import os\n\n\n'
+            'def create_agent():\n'
+            '    """Create agent."""\n'
+            '    return {}\n'
+        )
+        errors = validate(tmp_agent_project, rules_path)
+        ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
+        assert any("F401" in e.message and "agent.py" in e.message for e in ruff_errors)
+
+    def test_project_scope_skips_init_files(
+        self, tmp_agent_project: Path, rules_path: Path
+    ):
+        """__init__.py files should be skipped from lint even with project scope."""
+        errors = validate(tmp_agent_project, rules_path)
+        ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
+        assert ruff_errors == []
+
+    def test_tools_scope_ignores_agent_py(
+        self, tmp_agent_project: Path, rules_path: Path
+    ):
+        """With lint.scope set to 'tools', agent.py lint errors should be ignored."""
+        import yaml
+
+        (tmp_agent_project / "agent.py").write_text(
+            'import os\n\n\n'
+            'def create_agent():\n'
+            '    """Create agent."""\n'
+            '    return {}\n'
+        )
+
+        with open(rules_path) as f:
+            rules = yaml.safe_load(f)
+        rules["lint"]["scope"] = "tools"
+
+        scoped_rules = tmp_agent_project / "scoped_rules.yaml"
+        scoped_rules.write_text(yaml.dump(rules))
+
+        errors = validate(tmp_agent_project, scoped_rules)
+        ruff_errors = [e for e in errors if e.rule == "lint.ruff"]
+        assert not any("agent.py" in e.message for e in ruff_errors)
