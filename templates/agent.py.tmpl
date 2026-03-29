@@ -8,8 +8,8 @@ from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
 from deepagents.middleware import SummarizationMiddleware
 from langgraph.checkpoint.memory import MemorySaver
-
 from models import DiagnosisReport
+
 from tools import {{tool_imports}}
 
 
@@ -70,7 +70,10 @@ def run_interactive(agent):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="{{component_name}} ops agent")
     parser.add_argument("--once", type=str, help="Run a single query and exit")
-    parser.add_argument("--diagnose", action="store_true", help="Return structured DiagnosisReport")
+    parser.add_argument(
+        "--diagnose", action="store_true",
+        help="Return structured DiagnosisReport",
+    )
     args = parser.parse_args()
 
     if args.diagnose and not args.once:

@@ -20,7 +20,9 @@ def tmp_agent_project(tmp_path: Path) -> Path:
     # agent.py
     (project / "agent.py").write_text(textwrap.dedent("""\
         from deepagents import create_deep_agent
-        from tools import search_logs, query_metrics
+
+        from tools import query_metrics, search_logs
+
 
         def create_agent():
             return create_deep_agent(

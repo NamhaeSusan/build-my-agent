@@ -9,7 +9,14 @@ class DiagnosisReport(BaseModel):
     """Structured diagnosis result returned by the agent."""
 
     summary: str = Field(description="One-line summary of the finding")
-    severity: Literal["critical", "warning", "info"] = Field(description="Severity level")
-    evidence: list[str] = Field(description="Log snippets or metric values supporting the diagnosis")
-    root_cause: str | None = Field(default=None, description="Identified root cause, if determined")
+    severity: Literal["critical", "warning", "info"] = Field(
+        description="Severity level",
+    )
+    evidence: list[str] = Field(
+        description="Log snippets or metric values supporting the diagnosis",
+    )
+    root_cause: str | None = Field(
+        default=None,
+        description="Identified root cause, if determined",
+    )
     recommendation: str = Field(description="Suggested next action")

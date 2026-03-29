@@ -33,14 +33,17 @@ SAMPLE_VALUES = {
     ),
     "tool_all_list": '"http_request", "search_logs", "query_metrics"',
     "test_imports": (
-        "from tools.http_client import http_request\n"
         "from tools.log_search import search_logs\n"
-        "from tools.metric_query import query_metrics"
+        "from tools.metric_query import query_metrics\n"
+        "\n"
+        "from tools.http_client import http_request"
     ),
     "test_cases": (
         'def test_search_logs_returns_list():\n'
         '    """Verify search_logs returns a list."""\n'
         '    assert isinstance(search_logs, object)\n'
+        '    assert isinstance(http_request, object)\n'
+        '    assert isinstance(query_metrics, object)\n'
     ),
 }
 
