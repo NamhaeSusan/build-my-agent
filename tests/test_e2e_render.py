@@ -1,90 +1,31 @@
 """E2E test: render templates with sample values and verify guard passes."""
 
-import re
+import importlib.util
 from pathlib import Path
 
 from guard.checker import validate
 
-TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 RULES_PATH = Path(__file__).parent.parent / "guard" / "rules.yaml"
 
-# Sample values for all template placeholders.
-SAMPLE_VALUES = {
-    "component_name": "order-service",
-    "dependency_checks": "- Check payment gateway: `http_request('payment/health')`",
-    "common_issues": "- OOM: order-service pods restart when processing large batch orders",
-    "component_description": "Handles order creation, payment, and fulfillment",
-    "opensearch_endpoint": "https://opensearch.internal:9200",
-    "opensearch_index_pattern": "order-service-*",
-    "prometheus_endpoint": "https://prometheus.internal:9090",
-    "prometheus_namespace": "order_service",
-    "self_endpoint": "http://localhost:8080",
-    "log_fields": "order_id, user_id, trace_id",
-    "http_endpoints": "self (http://localhost:8080)",
-    "additional_capabilities": "- Check order status via internal API",
-    "domain_knowledge": "Order states: CREATED -> PAID -> SHIPPED -> DELIVERED",
-    "failure_patterns": "- Payment timeout: check payment-gateway metrics first",
-    "tool_imports": "http_request, query_metrics, search_logs",
-    "tool_list": "http_request, query_metrics, search_logs",
-    "tool_imports_block": (
-        "from tools.http_client import http_request\n"
-        "from tools.log_search import search_logs\n"
-        "from tools.metric_query import query_metrics"
-    ),
-    "tool_all_list": '"http_request", "search_logs", "query_metrics"',
-    "test_imports": (
-        "from tools.log_search import search_logs\n"
-        "from tools.metric_query import query_metrics\n"
-        "\n"
-        "from tools.http_client import http_request"
-    ),
-    "test_cases": (
-        'def test_search_logs_returns_list():\n'
-        '    """Verify search_logs returns a list."""\n'
-        '    assert isinstance(search_logs, object)\n'
-        '    assert isinstance(http_request, object)\n'
-        '    assert isinstance(query_metrics, object)\n'
-    ),
-}
+
+def _load_render_support():
+    module_path = Path(__file__).parent.parent / "scripts" / "render_support.py"
+    spec = importlib.util.spec_from_file_location("render_support", module_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
-def _render(template_text: str) -> str:
-    """Replace {{placeholder}} with sample values."""
-    def replacer(match: re.Match) -> str:
-        key = match.group(1)
-        if key not in SAMPLE_VALUES:
-            raise KeyError(f"Template placeholder not in SAMPLE_VALUES: {{{{{key}}}}}")
-        return SAMPLE_VALUES[key]
-
-    return re.sub(r"\{\{(\w+)\}\}", replacer, template_text)
+render_support = _load_render_support()
+FILE_MAP = render_support.FILE_MAP
+SAMPLE_VALUES = render_support.SAMPLE_VALUES
+render_project = render_support.render_project
 
 
-def _render_project(dest: Path) -> None:
-    """Render all templates into a complete agent project."""
-    # Map template paths to output paths
-    file_map = {
-        "agent.py.tmpl": "agent.py",
-        "models.py.tmpl": "models.py",
-        "pyproject.toml.tmpl": "pyproject.toml",
-        "config/agent.yaml.tmpl": "config/agent.yaml",
-        "prompts/system.md.tmpl": "prompts/system.md",
-        "tools/__init__.py.tmpl": "tools/__init__.py",
-        "tools/log_search.py.tmpl": "tools/log_search.py",
-        "tools/metric_query.py.tmpl": "tools/metric_query.py",
-        "tools/http_client.py.tmpl": "tools/http_client.py",
-        "tests/test_agent.py.tmpl": "tests/test_agent.py",
-        "tests/test_tools.py.tmpl": "tests/test_tools.py",
-        "skills/troubleshooting/SKILL.md.tmpl": "skills/troubleshooting/SKILL.md",
-        "skills/troubleshooting/runbooks/triage.md.tmpl": "skills/troubleshooting/runbooks/triage.md",
-        "skills/troubleshooting/runbooks/common-issues.md.tmpl": "skills/troubleshooting/runbooks/common-issues.md",
-    }
-
-    for tmpl_rel, out_rel in file_map.items():
-        tmpl_path = TEMPLATES_DIR / tmpl_rel
-        out_path = dest / out_rel
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        rendered = _render(tmpl_path.read_text())
-        out_path.write_text(rendered)
+def test_render_support_has_expected_standard_files():
+    assert FILE_MAP["models.py.tmpl"] == "models.py"
+    assert FILE_MAP["skills/troubleshooting/SKILL.md.tmpl"] == "skills/troubleshooting/SKILL.md"
 
 
 class TestE2ERender:
@@ -92,7 +33,7 @@ class TestE2ERender:
         """The core guarantee: templates + sample values -> guard passes."""
         project = tmp_path / "order-service-ops-agent"
         project.mkdir()
-        _render_project(project)
+        render_project(project, SAMPLE_VALUES)
         errors = validate(project, RULES_PATH)
         assert errors == [], f"Guard violations: {[e.message for e in errors]}"
 
@@ -100,7 +41,7 @@ class TestE2ERender:
         """Each rendered tool file has exactly one public function."""
         project = tmp_path / "order-service-ops-agent"
         project.mkdir()
-        _render_project(project)
+        render_project(project, SAMPLE_VALUES)
 
         import ast
 
@@ -125,14 +66,14 @@ class TestE2ERender:
 
         project = tmp_path / "order-service-ops-agent"
         project.mkdir()
-        _render_project(project)
+        render_project(project, SAMPLE_VALUES)
 
         config = yaml.safe_load((project / "config" / "agent.yaml").read_text())
         assert "opensearch" in config
         assert "prometheus" in config
         assert "http" in config
         assert config["opensearch"]["endpoint"] == "https://opensearch.internal:9200"
-        assert config["http"]["base_urls"]["self"] == "http://localhost:8080"
+        assert config["http"]["base_urls"]["self"] == SAMPLE_VALUES["self_endpoint"]
 
     def test_rendered_agent_py_is_valid_python(self, tmp_path: Path):
         """Rendered agent.py parses as valid Python."""
@@ -140,7 +81,7 @@ class TestE2ERender:
 
         project = tmp_path / "order-service-ops-agent"
         project.mkdir()
-        _render_project(project)
+        render_project(project, SAMPLE_VALUES)
 
         # Should not raise SyntaxError
         ast.parse((project / "agent.py").read_text())
