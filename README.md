@@ -44,6 +44,19 @@ pip install -e '.[dev]'
 python agent.py
 ```
 
+### Run modes
+
+```bash
+# Interactive chat (default)
+python agent.py
+
+# Single query
+python agent.py --once "check error rate for the last hour"
+
+# Structured diagnosis (returns JSON DiagnosisReport)
+python agent.py --diagnose --once "why is latency high?"
+```
+
 ## Generated Agent Structure
 
 Every agent follows this standard layout:
@@ -52,15 +65,23 @@ Every agent follows this standard layout:
 <component>-ops-agent/
 ├── pyproject.toml
 ├── agent.py                  # Entry point: create_deep_agent()
+├── models.py                 # DiagnosisReport for structured output
 ├── config/
 │   └── agent.yaml            # Endpoints, index patterns, namespaces
 ├── tools/
 │   ├── __init__.py
 │   ├── log_search.py         # OpenSearch log query
 │   ├── metric_query.py       # Prometheus metric query
+│   ├── http_client.py        # HTTP requests (health checks, deploy triggers)
 │   └── ...                   # Custom tools (Kafka, DB, etc.)
 ├── prompts/
 │   └── system.md             # Domain knowledge for the agent
+├── skills/
+│   └── troubleshooting/
+│       ├── SKILL.md           # Troubleshooting index
+│       └── runbooks/          # Individual runbook files
+│           ├── triage.md
+│           └── common-issues.md
 └── tests/
     ├── test_tools.py
     └── test_agent.py
@@ -84,6 +105,8 @@ The AST guard enforces:
 | Pattern | One public function per tool file |
 | Pattern | All tool functions must have docstrings |
 | Pattern | No hardcoded URLs (must use config) |
+| Pattern | Config must be loaded from config/agent.yaml |
+| Lint | ruff checks all Python files (E, F, I rules) |
 
 ## Plugin Structure
 
@@ -110,6 +133,12 @@ python3 -m pytest tests/ -v
 
 # Test guard on a project
 python3 -m guard check <agent-project-path>
+
+# Generate a sample agent from templates
+python3 scripts/render_agent.py <output-dir>
+
+# Lint
+python3 -m ruff check .
 ```
 
 ## License
