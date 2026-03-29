@@ -1,8 +1,22 @@
 """Render an agent project from templates with given values."""
 
+import importlib.util
 import sys
+from pathlib import Path
 
-from render_support import SAMPLE_VALUES, render_project
+
+def _load_render_support():
+    module_path = Path(__file__).with_name("render_support.py")
+    spec = importlib.util.spec_from_file_location("render_support", module_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_render_support = _load_render_support()
+SAMPLE_VALUES = _render_support.SAMPLE_VALUES
+render_project = _render_support.render_project
 
 
 if __name__ == "__main__":
