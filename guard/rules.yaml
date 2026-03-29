@@ -27,5 +27,6 @@ patterns:
 
 lint:
   ruff: true                            # run ruff on generated project
+  scope: "project"                      # "project" (all .py files) or "tools" (only tools/)
   ruff_select: "E,F,I"                  # errors, pyflakes, isort
   ruff_ignore: ""                       # no ignores by default

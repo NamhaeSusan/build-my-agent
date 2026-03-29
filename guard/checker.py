@@ -200,12 +200,16 @@ def _check_lint(project: Path, rules: dict, structure: dict) -> list[Violation]:
     select = rules.get("ruff_select", "E,F,I")
     ignore = rules.get("ruff_ignore", "")
 
-    tool_dir = project / structure.get("tool_dir", "tools")
-    py_files = [f for f in tool_dir.glob("*.py") if f.name != "__init__.py"] if tool_dir.is_dir() else []
+    scope = rules.get("scope", "project")
+    if scope == "tools":
+        tool_dir = project / structure.get("tool_dir", "tools")
+        py_files = [f for f in tool_dir.glob("*.py") if f.name != "__init__.py"] if tool_dir.is_dir() else []
+    else:
+        py_files = [f for f in project.rglob("*.py") if f.name != "__init__.py"]
     if not py_files:
         return []
 
-    cmd = ["ruff", "check", "--isolated", "--select", select]
+    cmd = ["ruff", "check", "--isolated", "--output-format", "concise", "--select", select]
     if ignore:
         cmd.extend(["--ignore", ignore])
     cmd.extend(str(f) for f in py_files)
