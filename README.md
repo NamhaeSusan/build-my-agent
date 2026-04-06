@@ -141,6 +141,10 @@ python3 scripts/render_agent.py <output-dir>
 python3 -m ruff check .
 ```
 
+## Smoke Test
+
+Verified via git-app smoke test on 2026-04-07 (#2).
+
 ## License
 
 MIT
